@@ -1,0 +1,82 @@
+/* Basic page tuning */
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Sidebar user list items */
+#onlineUsers .list-group-item {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #333;
+  margin-bottom: 0.4rem;
+  transition: background-color 0.15s ease;
+}
+
+#onlineUsers .list-group-item:hover {
+  background-color: #444;
+}
+
+/* Messages box */
+#messages {
+  min-height: 180px;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+/* Individual message styles */
+.message {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  display: inline-block;
+  max-width: 75%;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.message.system {
+  background: #f1f1f1;
+  color: #333;
+  font-style: italic;
+}
+
+.message.me {
+  background: #007bff;
+  border-radius: 10px;
+  color: #fff;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.message.other {
+  background: #e9ecef;
+  color: #212529;
+  align-self: flex-start;
+}
+
+/* Typing indicator */
+#typingIndicator {
+  min-height: 20px;
+  line-height: 20px;
+  margin-top: 4px;
+}
+
+/* Responsive tuning */
+@media (max-width: 767.98px) {
+  #onlineUsers .list-group-item {
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+
+  aside.col-12.col-md-3 {
+    order: 2;
+  }
+
+  main.col-12.col-md-9 {
+    order: 1;
+  }
+}
