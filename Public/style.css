@@ -1,0 +1,129 @@
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Sidebar list */
+#onlineUsers .list-group-item {
+  cursor: pointer;
+  border: none;
+  color: #fff;
+  background-color: #333;
+  margin-bottom: 0.4rem;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+#onlineUsers .list-group-item:hover {
+  background-color: #444;
+}
+
+/* Chat background */
+#messages {
+  background-color: #0b141a;
+  background-size: cover;
+  padding: 10px;
+  border-radius: 12px;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 240px);
+}
+
+/* Generic message wrapper */
+.message {
+  position: relative;
+  margin: 6px 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+/* My messages (right side) */
+.message.me {
+  align-self: flex-end;
+}
+
+.message.me .msg-bubble {
+  background-color: #005c4b; /* WhatsApp green */
+  color: #fff;
+  border-radius: 12px 12px 0px 12px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Other user's messages (left side) */
+.message.other {
+  align-self: flex-start;
+}
+
+.message.other .msg-bubble {
+  background-color: #202c33;
+  color: #e9edef;
+  border-radius: 12px 12px 12px 0px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Sender name in public chat */
+.msg-sender {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #57aa98; 
+}
+
+/* Timestamp inside the bubble */
+.msg-time {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  position: absolute;
+  bottom: 3px;
+  right: 30px;
+}
+
+/* Ticks (delivered/read) */
+.msg-status {
+  position: absolute;
+  bottom: 3px;
+  right: 8px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+.msg-bubble {
+  display: inline-block;
+  min-width: 15%;
+  word-wrap: break-word;
+  padding: 8px 12px;
+}
+
+.message.me .msg-bubble {
+  background-color: #005c4b;
+  color: #fff;
+  margin-left: auto;
+}
+
+.message.other .msg-bubble {
+  background-color: #202c33;
+  color: #e9edef;
+}
+
+
+/* Animation */
+.msg-bubble {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 767.98px) {
+  aside.col-12.col-md-3 { order: 2; }
+  main.col-12.col-md-9 { order: 1; }
+}
