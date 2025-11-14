@@ -2,6 +2,17 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
+#typingIndicator {
+  min-height: 20px;
+  line-height: 20px;
+  margin-top: 4px;
+  color: #fff;              
+  font-style: italic;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+
 /* Sidebar list */
 #onlineUsers .list-group-item {
   cursor: pointer;
@@ -34,25 +45,35 @@ body {
   display: flex;
   flex-direction: column;
   max-width: 80%;
+  min-width: 15%;
   word-wrap: break-word;
 }
 
 /* My messages (right side) */
+
 .message.me {
-  align-self: flex-end;
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+  align-items: flex-end;
+  text-align: right;
+  width: 100%; /* ensures the sender bubble stays to the right edge */
+  text-align: start;
 }
 
 .message.me .msg-bubble {
-  background-color: #005c4b; /* WhatsApp green */
+  background-color: #1177d6;
   color: #fff;
   border-radius: 12px 12px 0px 12px;
   padding: 8px 12px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  
 }
 
 /* Other user's messages (left side) */
 .message.other {
   align-self: flex-start;
+  min-width: 10%;
 }
 
 .message.other .msg-bubble {
@@ -68,43 +89,138 @@ body {
   font-size: 0.8rem;
   font-weight: 600;
   margin-bottom: 2px;
-  color: #57aa98; 
+  color: #004789; 
 }
 
-/* Timestamp inside the bubble */
-.msg-time {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
-  position: absolute;
-  bottom: 3px;
-  right: 30px;
-}
 
 /* Ticks (delivered/read) */
 .msg-status {
   position: absolute;
-  bottom: 3px;
-  right: 8px;
+  bottom: 1px;
+  right: 46px;
   font-size: 13px;
-  opacity: 0.8;
-}
-.msg-bubble {
-  display: inline-block;
-  min-width: 15%;
-  word-wrap: break-word;
-  padding: 8px 12px;
+  opacity: 0.85;
 }
 
-.message.me .msg-bubble {
-  background-color: #005c4b;
-  color: #fff;
-  margin-left: auto;
+.msg-bubble {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  background-color: #202c33;
+  color: #e9edef;
+  border-radius: 14px;
+  padding: 8px 12px 10px 12px; /* compact padding */
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: normal;
+  width: fit-content;
+  min-width: 110px; 
+  max-width: 70%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  font-size: 0.93rem;
 }
+
+/* --- Message Tail Styles --- */
+.message.me .msg-bubble::after,
+.message.other .msg-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 🟩 Tail for sender (right side) */
+.message.me .msg-bubble::after {
+  right: -7px;
+  border-left: 8px solid #1177d6;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-radius: 0 0 4px 0;
+}
+
+/* 🟦 Tail for receiver (left side) */
+.message.other .msg-bubble::after {
+  left: -7px;
+  border-right: 8px solid #202c33;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-radius: 0 0 0 4px;
+}
+
 
 .message.other .msg-bubble {
   background-color: #202c33;
   color: #e9edef;
+  align-self: flex-start;
 }
+
+/* 🕒 Timestamp – inside bottom-right corner */
+.msg-time {
+  position: absolute;
+  bottom: 2px;
+  right: 10px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.75;
+  margin: 0;
+  padding: 0;
+}
+
+.message.other .msg-time {
+  color: rgba(233, 237, 239, 0.7);
+}
+.msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-top: 6px;
+  flex-shrink: 0;  
+}
+
+.msg-status i {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+#chat-container {
+  position: relative;
+  overflow-y: auto;
+  height: calc(100vh - 150px); /* adjust based on your layout */
+  padding: 10px;
+  background-color: #f9f9f9;
+  scroll-behavior: smooth;
+}
+
+/* Down Arrow Button inside message area */
+#scrollToBottomBtn {
+  position: fixed; /* fixed relative to viewport for stable position */
+  left: 50%;
+  bottom: 120px; /* adjust to appear above input area */
+  transform: translateX(-50%);
+  background-color: #4e9af1;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  display: none;
+  z-index: 100;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+#scrollToBottomBtn:hover {
+  background-color: #3378d1;
+  transform: translateX(-50%) scale(1.1);
+}
+
 
 
 /* Animation */
@@ -117,13 +233,34 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+/* --- Message Fade-In Animation --- */
+@keyframes messagePop {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@media (max-width: 767.98px) {
+.message {
+  animation: messagePop 0.25s ease;
+}
+
+@keyframes blinkTyping {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+
+#typingIndicator {
+  animation: blinkTyping 1s infinite;
+}
+
+
+
+/* @media (max-width: 767.98px) {
   aside.col-12.col-md-3 { order: 2; }
   main.col-12.col-md-9 { order: 1; }
-}
+} */

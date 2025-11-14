@@ -27,12 +27,12 @@
           </div>
 
           <div class="card-body d-flex flex-column p-2 bg-secondary">
-            <div class="join-section mb-3">
+            <!-- <div class="join-section mb-3">
               <div class="input-group">
                 <input id="sender" class="form-control" type="text" placeholder="Your name" />
                 <button class="btn btn-primary" type="button" id="joinBtn" onclick="joinChat()">Join</button>
               </div>
-            </div>
+            </div> -->
 
             <div class="user-list flex-grow-1 overflow-auto bg-dark">
               <ul id="onlineUsers" class="list-group list-group-flush bg-secondary text-light"></ul>
@@ -54,7 +54,7 @@
 
           <div class="card-body bg-dark p-3 d-flex flex-column gap-2 flex-grow-1 overflow-hidden">
             <div id="messages" class="messages-list list-unstyled flex-grow-1 overflow-auto p-2 bg-secondary text-light rounded border"></div>
-            <div id="typingIndicator" class="text-muted small"></div>
+            <div id="typingIndicator" class="text-light small"></div>
 
             <form id="messageForm" class="d-flex gap-2 align-items-center mt-2" onsubmit="event.preventDefault(); sendMessage();">
               <input id="messageInput" class="form-control" type="text" placeholder="Type your message..." autocomplete="off" />
@@ -65,6 +65,8 @@
           </div>
         </div>
       </main>
+      <button onclick="logout()" class="btn btn-danger btn-sm">Logout</button>
+
     </div>
   </div>
 

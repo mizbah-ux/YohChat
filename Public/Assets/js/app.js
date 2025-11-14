@@ -1,29 +1,69 @@
-const socket = io('http://localhost:3000');
+const token = localStorage.getItem('token');
+const username = localStorage.getItem('username');
+
+// Redirect to login if not logged in
+if (!token || !username) {
+  window.location.href = '/login.html';
+}
+
+// ✅ Connect to socket with authentication token
+const socket = io('http://localhost:3000', {
+  auth: { token }
+});
+
+// ✅ Set current user from login
+let currentUserId = username;
+
 const messagesDiv = document.getElementById('messages');
 const input = document.getElementById('messageInput');
 const typingDiv = document.getElementById('typingIndicator');
-const senderInput = document.getElementById('sender');
 const usersList = document.getElementById('onlineUsers');
 const currentChatLabel = document.getElementById('currentChatLabel');
 const backToPublicBtn = document.getElementById('backToPublicBtn');
 let typingTimeout;
 
-let currentUserId = null;
+// ✅ Only keep these variables once
 let activeChat = 'public';
 let activeRecipient = null;
 let publicMessages = [];
 let privateMessages = {};
 let unreadUsers = new Set();
 
+
+
+
 // Chat history
 socket.on('chatHistory', (messages) => {
-  messages.forEach(msg => addMessage(msg.sender, msg.content, msg.timestamp));
+  publicMessages = []; // reset the array
+
+  messages.forEach((msg) => {
+    addMessage(msg.sender, msg.content, msg.timestamp);
+    publicMessages.push({
+      sender: msg.sender,
+      text: msg.content,
+      time: msg.timestamp
+    });
+  });
 });
+
 
 // Public chat messages
 socket.on('receiveMessage', (data) => {
   addMessage(data.sender, data.content, data.timestamp);
+
+  // ✅ Store public messages in memory (so we can reload later)
+  publicMessages.push({
+    sender: data.sender,
+    text: data.content,
+    time: data.timestamp
+  });
+
+  // ✅ Keep only last 20 to avoid memory overflow
+  if (publicMessages.length > 20) {
+    publicMessages.shift();
+  }
 });
+
 
 // Private message receive
 socket.on('receive_private_message', (data) => {
@@ -38,12 +78,17 @@ socket.on('receive_private_message', (data) => {
   }
 });
 
+socket.on('connect', () => {
+  socket.emit('joinChat', currentUserId);
+  console.log(`🔗 Connected as ${currentUserId}`);
+});
+
+
 // Private chat history
 socket.on('private_history', (messages) => {
   messagesDiv.innerHTML = '';
   const sys = document.createElement('div');
   sys.className = 'message system';
-  sys.textContent = `Private chat loaded`;
   messagesDiv.appendChild(sys);
 
   messages.forEach(m => addDMMessage(m.sender, m.content, m.timestamp, m.receiver));
@@ -124,19 +169,24 @@ input.addEventListener('input', () => {
 
 // Send message
 function sendMessage() {
-  const sender = senderInput.value.trim();
   const msg = input.value.trim();
-  if (!sender) return alert('Enter your name first!');
-  if (msg === '') return;
+  if (!msg) return;
 
   if (activeChat === 'public') {
-    socket.emit('sendMessage', { sender, content: msg });
+    socket.emit('sendMessage', { sender: currentUserId, content: msg });
   } else if (activeChat === 'private' && activeRecipient) {
-    socket.emit('private_message', { sender: currentUserId, recipientId: activeRecipient, message: msg });
-    addDMMessage(currentUserId, msg, new Date().toISOString());
+    socket.emit('private_message', {
+    sender: currentUserId,
+    recipientId: activeRecipient,
+    message: msg
+});
+    addDMMessage(currentUserId, msg, Date.now());
+
   }
+
   input.value = '';
 }
+
 
 // ----- Public message -----
 function addMessage(sender, text, time, delivered = true, read = false) {
@@ -149,7 +199,18 @@ function addMessage(sender, text, time, delivered = true, read = false) {
 
   const msgContent = document.createElement('div');
   msgContent.className = 'msg-bubble';
-  msgContent.innerHTML = `<span>${text}</span>`;
+  msgContent.innerHTML = `
+  <div class="msg-text">${text}</div>
+  <div class="msg-meta">
+    <span class="msg-time">${new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+    ${sender === currentUserId ? `
+      <span class="msg-status">
+        <i class="ri-check-double-line text-light"></i>
+      </span>` : ''}
+  </div>
+  `;
+
+
 
   // Timestamp
   const timeSpan = document.createElement('span');
@@ -189,7 +250,18 @@ function addDMMessage(sender, text, time, partner, delivered = true, read = fals
 
   const msgContent = document.createElement('div');
   msgContent.className = 'msg-bubble';
-  msgContent.innerHTML = `<span>${text}</span>`;
+  msgContent.innerHTML = `
+  <div class="msg-text">${text}</div>
+  <div class="msg-meta">
+    <span class="msg-time">${new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+    ${sender === currentUserId ? `
+      <span class="msg-status">
+        <i class="ri-check-double-line text-light"></i>
+      </span>` : ''}
+  </div>
+ `;
+
+
 
   // Timestamp
   const timeSpan = document.createElement('span');
@@ -227,15 +299,6 @@ function updateUserListHighlight() {
   });
 }
 
-// Join chat
-function joinChat() {
-  const username = senderInput.value.trim();
-  if (!username) return alert('Enter your name first!');
-  currentUserId = username;
-  socket.emit('joinChat', username);
-  senderInput.disabled = true;
-  document.getElementById('joinBtn').disabled = true;
-}
 
 // Switch back to public
 function switchToPublic() {
@@ -274,6 +337,11 @@ function formatLastSeen(dateString) {
   return date.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function logout() {
+  localStorage.clear();
+  window.location.href = '/login.html';
+}
+
+
 window.sendMessage = sendMessage;
-window.joinChat = joinChat;
 window.switchToPublic = switchToPublic;

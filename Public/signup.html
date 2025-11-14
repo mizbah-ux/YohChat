@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <style>
+    body {
+      display:flex;justify-content:center;align-items:center;
+      height:100vh;background:linear-gradient(135deg,#4CAF50,#2c3e50);
+      font-family:Arial,sans-serif;
+    }
+    .signup-box {
+      background:#fff;padding:2rem;border-radius:10px;
+      box-shadow:0 5px 15px rgba(0,0,0,0.2);
+      width:100%;max-width:350px;
+    }
+    input,button {width:100%;padding:0.8rem;margin:0.5rem 0;border-radius:6px;border:1px solid #ccc;}
+    button{background:#4CAF50;color:#fff;cursor:pointer;}
+    button:hover{background:#45a049;}
+  </style>
+</head>
+<body>
+  <div class="signup-box">
+    <h2>Create Account</h2>
+    <form id="signupForm">
+      <input type="text" id="name" placeholder="Enter your name" required>
+      <input type="email" id="email" placeholder="Enter email" required>
+      <input type="password" id="password" placeholder="Enter password" required>
+      <button type="submit">Sign Up</button>
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      try {
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("Signup successful! Please login now.");
+          window.location.href = "/login.html";
+        } else {
+          alert(data.message || "Signup failed");
+        }
+      } catch (err) {
+        console.error("Signup error:", err);
+        alert("Server error or invalid input");
+      }
+    });
+  </script>
+</body>
+</html>

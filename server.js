@@ -1,26 +1,49 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 
+// ✅ Import models and routes
+const User = require('./models/User');
+const authRoutes = require('./routes/auth');   // <--- THIS was missing
+
+// ✅ Initialize express app
 const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
+// ✅ Use authentication routes
+app.use('/api/auth', authRoutes);
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
+// ---- JWT AUTH FOR SOCKET.IO ----
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error("No token provided"));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.user = decoded;  // store user data for later use
+    next();
+  } catch (err) {
+    console.error("JWT Error:", err);
+    next(new Error("Invalid token"));
+  }
+});
+
+
+// ✅ MongoDB connection
 mongoose.connect('mongodb://127.0.0.1:27017/yohchat')
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: false },
-  password: String,
-  lastSeen: { type: Date, default: Date.now }
-});
-const User = mongoose.model('User', userSchema);
+// const User = mongoose.model('User', userSchema);
 
 const messageSchema = new mongoose.Schema({
   sender: String,
@@ -42,12 +65,22 @@ let onlineUsers = {};
 let socketsByName = {};
 
 io.on('connection', (socket) => {
-  console.log('🟢 User connected:', socket.id);
+  const userName = socket.user.name;  // username taken from JWT token
 
-  Message.find().sort({ timestamp: 1 }).limit(20)
-    .then(messages => socket.emit('chatHistory', messages));
+  console.log(`🟢 ${userName} connected`);
 
-  socket.on('joinChat', async (username) => {
+  // Send last 20 messages (latest first)
+  Message.find().sort({ timestamp: -1 }).limit(20)
+  .then(messages => {
+    // Reverse before sending so newest messages appear at the bottom
+    socket.emit('chatHistory', messages.reverse());
+  })
+  .catch(err => console.error('Error loading chat history:', err));
+
+
+    socket.on('joinChat', async () => {
+    const username = socket.user.name;   // use authenticated username
+
     onlineUsers[socket.id] = username;
     socketsByName[username] = socket.id;
     console.log(`${username} joined (${socket.id})`);
